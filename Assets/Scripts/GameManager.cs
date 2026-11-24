@@ -14,6 +14,9 @@ public class GameManager : MonoBehaviour
     public GameMode testMode = GameMode.Campaign;
     public int testLevel = 1;
 
+    [Header("Skóre")]
+    public int secretBonus = 500;              // body za každé nájdené tajomstvo
+
     public static GameManager Instance { get; private set; }
 
     public State CurrentState { get; private set; }
@@ -23,6 +26,8 @@ public class GameManager : MonoBehaviour
     public int Score { get; private set; }
     public float PlayTime { get; private set; }
     public int Wave { get; set; }              // nastavuje SurvivalSpawner
+    public int SecretsFound { get; private set; }
+    public int TotalSecrets { get; private set; }
 
     public event Action Won;
     public event Action Lost;
@@ -47,6 +52,7 @@ public class GameManager : MonoBehaviour
         Enemy.Killed += OnKilled;
         if (PlayerHealth.Instance) PlayerHealth.Instance.Died += OnDied;
         TotalEnemies = Mode == GameMode.Campaign ? Enemy.All.Count : 0;
+        TotalSecrets = Secret.All.Count;
         PlayerController.LockCursor(true);
     }
 
@@ -66,6 +72,14 @@ public class GameManager : MonoBehaviour
         if (CurrentState != State.Playing) return;
         Kills++;
         Score += e.scoreValue;
+    }
+
+    // volá Secret, keď doň hráč vojde
+    public void FoundSecret()
+    {
+        if (CurrentState != State.Playing) return;
+        SecretsFound++;
+        Score += secretBonus;
     }
 
     public void Win()
