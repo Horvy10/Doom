@@ -8,6 +8,7 @@ public class DebugHUD : MonoBehaviour
     PlayerInventory inv;
     WeaponSystem ws;
     GameManager gm;
+    SurvivalSpawner spawner;
     bool paused;
     string message;
     float messageUntil;
@@ -22,6 +23,9 @@ public class DebugHUD : MonoBehaviour
         hp.Damaged += OnDamaged;
         Door.NeedKey += OnNeedKey;
         Pickup.Collected += OnCollected;
+        Secret.Found += OnSecret;
+        spawner = FindAnyObjectByType<SurvivalSpawner>();
+        if (spawner) spawner.WaveStarted += OnWave;
     }
 
     void OnDestroy()
@@ -29,11 +33,15 @@ public class DebugHUD : MonoBehaviour
         if (hp) hp.Damaged -= OnDamaged;
         Door.NeedKey -= OnNeedKey;
         Pickup.Collected -= OnCollected;
+        Secret.Found -= OnSecret;
+        if (spawner) spawner.WaveStarted -= OnWave;
     }
 
     void OnDamaged(float amount) { damageFlash = 0.5f; }
     void OnNeedKey(KeyColor k) { Show("Potrebuješ " + Pickup.KeyName(k) + " kľúč"); }
     void OnCollected(Pickup p) { Show("Zobral si: " + p.DisplayName); }
+    void OnSecret(Secret s) { Show("Našiel si tajné miesto!"); }
+    void OnWave(int wave) { Show("Vlna " + wave); }
 
     void Show(string text)
     {
@@ -83,7 +91,7 @@ public class DebugHUD : MonoBehaviour
         GUI.Label(new Rect(20, Screen.height - 60, 600, 30), w.name + "   Munícia: " + ammo + (keys.Length > 0 ? "   Kľúče: " + keys : ""), normal);
 
         string info = gm.Mode == GameMode.Campaign
-            ? GameSession.Current.name + "   Zabití: " + gm.Kills + "/" + gm.TotalEnemies
+            ? GameSession.Current.name + "   Zabití: " + gm.Kills + "/" + gm.TotalEnemies + "   Tajomstvá: " + gm.SecretsFound + "/" + gm.TotalSecrets
             : "Survival   Vlna: " + gm.Wave + "   Zabití: " + gm.Kills;
         GUI.Label(new Rect(20, 20, 800, 30), info + "   Skóre: " + gm.Score + "   Čas: " + gm.PlayTime.ToString("0"), normal);
 
