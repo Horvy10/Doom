@@ -22,7 +22,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     void OnDestroy() { if (Instance == this) Instance = null; }
 
-    public void TakeDamage(float amount, Vector3 point, Vector3 normal)
+    public void TakeDamage(float amount, Vector3 point, Vector3 normal, GameObject attacker)
     {
         if (IsDead || amount <= 0f) return;
 
