@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public enum PickupType { Health, Armor, Bullets, Shells, Key, Weapon }
+public enum PickupType { Health, Armor, Bullets, Shells, Rockets, Key, Weapon }
 
 // Predmet na zemi. Zoberie sa prejdením; ak hráč už má plno, ostane ležať.
 public class Pickup : MonoBehaviour
@@ -50,6 +50,7 @@ public class Pickup : MonoBehaviour
                 return a && a.AddArmor(amount);
             case PickupType.Bullets: return inv.AddAmmo(AmmoType.Bullets, ammo);
             case PickupType.Shells: return inv.AddAmmo(AmmoType.Shells, ammo);
+            case PickupType.Rockets: return inv.AddAmmo(AmmoType.Rockets, ammo);
             case PickupType.Key: return inv.AddKey(key);
             case PickupType.Weapon:
                 WeaponSystem ws = inv.GetComponent<WeaponSystem>();
@@ -68,6 +69,7 @@ public class Pickup : MonoBehaviour
                 case PickupType.Armor: return "brnenie";
                 case PickupType.Bullets: return "náboje";
                 case PickupType.Shells: return "náboje do brokovnice";
+                case PickupType.Rockets: return "rakety";
                 case PickupType.Key: return KeyName(key) + " kľúč";
                 case PickupType.Weapon: return "zbraň";
             }

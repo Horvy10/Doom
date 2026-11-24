@@ -1,14 +1,17 @@
 using System;
 using UnityEngine;
 
-// Ohnivá guľa impa. Letí rovno, zraní hráča, zanikne pri náraze do steny.
+// Projektil: ohnivá guľa impa alebo raketa hráča. Letí rovno a zanikne pri prvom náraze.
+// splashRadius > 0 = pri náraze vybuchne (raketa), inak zraní len to, do čoho narazil.
+// Projektil nepriateľa preletí cez nepriateľov rovnakého druhu, ostatných zraní (a tí sa potom pobijú).
 [RequireComponent(typeof(Rigidbody))]
 public class Projectile : MonoBehaviour
 {
     public float speed = 14f;
     public float lifetime = 6f;
+    public float splashRadius = 0f;
 
-    public static event Action<Vector3> Impact;   // efekt výbuchu (Samo)
+    public static event Action<Vector3> Impact;   // efekt nárazu (Samo)
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void ResetStatics() { Impact = null; }
@@ -16,6 +19,8 @@ public class Projectile : MonoBehaviour
     Vector3 dir;
     float damage;
     GameObject owner;
+    Enemy ownerEnemy;
+    bool done;
 
     void Awake()
     {
@@ -29,6 +34,8 @@ public class Projectile : MonoBehaviour
         dir = direction.normalized;
         damage = dmg;
         owner = from;
+        ownerEnemy = from ? from.GetComponent<Enemy>() : null;
+        transform.rotation = Quaternion.LookRotation(dir);
         Destroy(gameObject, lifetime);
     }
 
@@ -39,14 +46,25 @@ public class Projectile : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.isTrigger) return;
+        if (done || other.isTrigger) return;
         if (owner && other.transform.IsChildOf(owner.transform)) return;
-        if (other.GetComponentInParent<Enemy>()) return;   // cez iných nepriateľov preletí
 
-        PlayerHealth p = other.GetComponentInParent<PlayerHealth>();
-        if (p) p.TakeDamage(damage, transform.position, dir);
+        Enemy hitEnemy = other.GetComponentInParent<Enemy>();
+        if (ownerEnemy && hitEnemy && hitEnemy.kind == ownerEnemy.kind) return;   // rovnaký druh preletí
 
-        Impact?.Invoke(transform.position);
+        done = true;
+        Vector3 point = transform.position - dir * 0.3f;   // kúsok pred stenou, nie v nej
+        if (splashRadius > 0f)
+        {
+            Explosion.Blast(point, splashRadius, damage, owner);
+        }
+        else
+        {
+            IDamageable target = other.GetComponentInParent<IDamageable>();
+            if (target != null) target.TakeDamage(damage, transform.position, dir, owner);
+        }
+
+        Impact?.Invoke(point);
         Destroy(gameObject);
     }
 }

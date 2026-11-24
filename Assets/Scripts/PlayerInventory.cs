@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum AmmoType { None, Bullets, Shells }
+public enum AmmoType { None, Bullets, Shells, Rockets }
 public enum KeyColor { None, Red, Blue, Yellow }
 
 // Munícia a kľúče hráča
@@ -10,8 +10,10 @@ public class PlayerInventory : MonoBehaviour
 {
     public int bullets = 50;
     public int shells = 0;
+    public int rockets = 0;
     public int maxBullets = 200;
     public int maxShells = 50;
+    public int maxRockets = 50;
 
     readonly HashSet<KeyColor> keys = new HashSet<KeyColor>();
 
@@ -23,6 +25,7 @@ public class PlayerInventory : MonoBehaviour
     {
         if (type == AmmoType.Bullets) return bullets;
         if (type == AmmoType.Shells) return shells;
+        if (type == AmmoType.Rockets) return rockets;
         return 0;
     }
 
@@ -30,6 +33,7 @@ public class PlayerInventory : MonoBehaviour
     {
         if (type == AmmoType.Bullets) return maxBullets;
         if (type == AmmoType.Shells) return maxShells;
+        if (type == AmmoType.Rockets) return maxRockets;
         return 0;
     }
 
@@ -37,6 +41,7 @@ public class PlayerInventory : MonoBehaviour
     {
         if (type == AmmoType.Bullets) bullets = value;
         else if (type == AmmoType.Shells) shells = value;
+        else if (type == AmmoType.Rockets) rockets = value;
     }
 
     // vráti false, ak už je plné

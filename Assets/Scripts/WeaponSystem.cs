@@ -14,6 +14,7 @@ public class Weapon
     public AmmoType ammo;
     public int ammoPerShot = 1;
     public bool owned;
+    public Projectile projectile;   // ak je nastavený, zbraň strieľa projektil (raketomet), damage = sila výbuchu
 
     public bool Melee { get { return range <= 3f; } }
 
@@ -33,7 +34,7 @@ public class Weapon
     }
 }
 
-// Zbrane hráča: výber 1-4 alebo kolieskom, streľba ľavým tlačidlom (podržať = automaticky).
+// Zbrane hráča: výber 1-5 alebo kolieskom, streľba ľavým tlačidlom (podržať = automaticky).
 // Streľba je raycast z kamery. Model zbrane je zatiaľ kocka; Samo môže dať vlastné do viewModels.
 public class WeaponSystem : MonoBehaviour
 {
@@ -44,6 +45,7 @@ public class WeaponSystem : MonoBehaviour
         new Weapon("Pištoľ",     15f, 1, 1f,   0.40f, 100f, AmmoType.Bullets, true),
         new Weapon("Brokovnica", 10f, 7, 5f,   0.90f, 60f,  AmmoType.Shells,  false),
         new Weapon("Guľomet",    12f, 1, 2.5f, 0.11f, 100f, AmmoType.Bullets, false),
+        new Weapon("Raketomet", 100f, 1, 0f,   0.80f, 100f, AmmoType.Rockets, false),
     };
     public float noiseRadius = 25f;          // streľba zobudí nepriateľov v tomto okruhu
 
@@ -67,6 +69,7 @@ public class WeaponSystem : MonoBehaviour
         new Vector3(0.07f, 0.12f, 0.28f),
         new Vector3(0.09f, 0.09f, 0.60f),
         new Vector3(0.16f, 0.16f, 0.50f),
+        new Vector3(0.18f, 0.18f, 0.70f),
     };
 
     PlayerInventory inv;
@@ -131,17 +134,30 @@ public class WeaponSystem : MonoBehaviour
     {
         if (i < 0 || i >= weapons.Count) return false;
         Weapon w = weapons[i];
-        bool gotAmmo = inv.AddAmmo(w.ammo, w.ammo == AmmoType.Shells ? 8 : 20);
+        bool gotAmmo = inv.AddAmmo(w.ammo, StartAmmo(w.ammo));
         if (w.owned) return gotAmmo;
         w.owned = true;
         Select(i);
         return true;
     }
 
+    // koľko munície dá zobratie zbrane
+    static int StartAmmo(AmmoType type)
+    {
+        switch (type)
+        {
+            case AmmoType.Shells: return 8;
+            case AmmoType.Rockets: return 2;
+            case AmmoType.None: return 0;
+        }
+        return 20;
+    }
+
+    // keď dôjde munícia, prepne na najlepšiu zbraň s muníciou (na raketomet sám neprepne, mohol by si sa zraniť)
     void SwitchToBest()
     {
         for (int i = weapons.Count - 1; i >= 0; i--)
-            if (i != Current && weapons[i].owned && HasAmmo(weapons[i])) { Select(i); return; }
+            if (i != Current && weapons[i].owned && weapons[i].projectile == null && HasAmmo(weapons[i])) { Select(i); return; }
     }
 
     void Fire()
@@ -151,7 +167,13 @@ public class WeaponSystem : MonoBehaviour
         nextFire = Time.time + w.fireDelay;
 
         Transform c = cam.transform;
-        for (int p = 0; p < w.pellets; p++)
+        if (w.projectile)
+        {
+            Vector3 from = c.position + c.forward * 0.8f;
+            Projectile proj = Instantiate(w.projectile, from, c.rotation);
+            proj.Launch(c.forward, w.damage, gameObject);
+        }
+        for (int p = 0; !w.projectile && p < w.pellets; p++)
         {
             Quaternion offset = Quaternion.Euler(UnityEngine.Random.Range(-w.spread, w.spread),
                                                  UnityEngine.Random.Range(-w.spread, w.spread), 0f);
@@ -160,9 +182,9 @@ public class WeaponSystem : MonoBehaviour
             if (Physics.Raycast(c.position, dir, out RaycastHit hit, w.range, ~0, QueryTriggerInteraction.Ignore))
             {
                 IDamageable target = hit.collider.GetComponentInParent<IDamageable>();
-                bool enemy = target != null && !(target is PlayerHealth);
-                if (enemy) target.TakeDamage(w.damage * UnityEngine.Random.Range(0.8f, 1.2f), hit.point, hit.normal);
-                Hit?.Invoke(hit.point, hit.normal, enemy);
+                if (target != null && !(target is PlayerHealth))
+                    target.TakeDamage(w.damage * UnityEngine.Random.Range(0.8f, 1.2f), hit.point, hit.normal, gameObject);
+                Hit?.Invoke(hit.point, hit.normal, target is Enemy);
             }
         }
 
