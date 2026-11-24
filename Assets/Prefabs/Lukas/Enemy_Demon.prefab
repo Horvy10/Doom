@@ -101,9 +101,15 @@ MonoBehaviour:
   attackDamage: 20
   attackCooldown: 1
   accuracy: 0.55
+  burst: 1
   projectilePrefab: {fileID: 0}
   scoreValue: 300
   eye: {fileID: 7777401047539259230}
+  painChance: 0.4
+  painTime: 0.3
+  dropPrefab: {fileID: 0}
+  dropChance: 0
+  dropAmount: 0
 --- !u!1 &6135170413823531533
 GameObject:
   m_ObjectHideFlags: 0

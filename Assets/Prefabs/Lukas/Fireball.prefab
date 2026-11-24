@@ -253,3 +253,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Projectile
   speed: 14
   lifetime: 6
+  splashRadius: 0

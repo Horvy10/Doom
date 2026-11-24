@@ -158,7 +158,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a061a0646da434b438591c1d3eb09a60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Pickup
-  type: 4
+  type: 5
   amount: 25
   key: 1
   weaponIndex: 2
