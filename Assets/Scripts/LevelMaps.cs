@@ -1,11 +1,13 @@
 // Mapy levelov ako text. Jeden znak = jedna bunka (LevelBuilder.cell, predvolene 4 m).
 //
 //  #  stena                 .  podlaha              P  štart hráča
-//  z  zombie (strieľa)      i  imp (ohnivé gule)    d  démon (útočí zblízka)
-//  h  lekárnička            a  brnenie              b  náboje       s  náboje do brokovnice
-//  S  brokovnica            C  guľomet
+//  z  zombie (strieľa)      i  imp (ohnivé gule)    d  démon (útočí zblízka)    H  ťažký strelec (dávky)
+//  h  lekárnička            a  brnenie              b  náboje       s  náboje do brokovnice    k  rakety
+//  S  brokovnica            C  guľomet              L  raketomet
+//  o  výbušný sud
 //  D  dvere (otvára sa E)   r/u/y  dvere na červený/modrý/žltý kľúč
 //  R/U/Y  červený/modrý/žltý kľúč
+//  =  tajné dvere (vyzerajú ako stena, otvára sa E)   !  tajné miesto (bonus k skóre)
 //  E  východ z levelu       x  spawn bod pre survival
 //
 // Dvere musia mať steny na dvoch protiľahlých stranách (vľavo+vpravo alebo hore+dole).
@@ -65,21 +67,58 @@ public static class LevelMaps
             "#...#.....#..i....#",
             "###################",
         },
+        new[]
+        {
+            "#####################",
+            "#P...#.......o.....i#",
+            "#..S.#..z........z..#",
+            "#.b..D....o.o.......#",
+            "#....#.........h....#",
+            "#=####......d.......#",
+            "#!.s#####D#######D###",
+            "#.a.#.......#.......#",
+            "#####..z....#..H..k.#",
+            "#...r....o..#.......#",
+            "#.U.#...i...#...L...#",
+            "#...#..s....D.......#",
+            "#####...C...#..R....#",
+            "#E..u.......#...z...#",
+            "#####################",
+        },
+        new[]
+        {
+            "#######################",
+            "#E..#.....i.....i.....#",
+            "#...y.......o.........#",
+            "#...#..H.......d..H...#",
+            "########u##############",
+            "#.Y.#...z.#..b..#..i..#",
+            "#...#..C..#..k..#.....#",
+            "#...r..o..D..h..D..d..#",
+            "#...#.s...#.....#..U..#",
+            "#...#.R...#..o..#..z..#",
+            "#######=#####D#####=###",
+            "#####.!.s.#.....#.!.a.#",
+            "#####.L.b.#..P..#.h.k.#",
+            "###########.....#######",
+            "###########..S..#######",
+            "#######################",
+        },
     };
 
     public static readonly string[] Arena =
     {
         "#################",
         "#x.............x#",
-        "#...............#",
+        "#.......L.......#",
         "#..##.......##..#",
         "#..##...h...##..#",
-        "#...............#",
+        "#...o.......o...#",
         "#S......P......C#",
         "#...b.......s...#",
         "#..##.......##..#",
         "#..##...a...##..#",
-        "#...............#",
+        "#.......k.......#",
         "#x......x......x#",
         "#################",
     };
