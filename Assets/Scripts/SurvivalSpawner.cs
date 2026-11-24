@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Survival: vlny nepriateľov na spawn bodoch ('x' v mape). Každá vlna je väčšia,
-// silnejšie typy prichádzajú neskôr. Po vlne hráč dostane muníciu a trochu zdravia.
+// silnejšie typy prichádzajú neskôr a každá vlna má nepriateľov s viac životmi.
+// Po vlne hráč dostane muníciu a trochu zdravia a predmety v aréne sa obnovia.
 public class SurvivalSpawner : MonoBehaviour
 {
     public Enemy[] enemyPrefabs;               // poradie: od najslabšieho
@@ -12,6 +13,8 @@ public class SurvivalSpawner : MonoBehaviour
     public float firstWaveDelay = 2f;
     public float timeBetweenWaves = 4f;
     public float spawnDelay = 0.5f;
+    public float waveHealthGrowth = 0.08f;     // o koľko viac životov majú nepriatelia v každej ďalšej vlne
+    public LevelBuilder level;                 // vyplní LevelBuilder (obnova predmetov)
 
     public event Action<int> WaveStarted;
 
@@ -53,6 +56,7 @@ public class SurvivalSpawner : MonoBehaviour
             inv.AddAmmo(AmmoType.Bullets, 40);
             inv.AddAmmo(AmmoType.Shells, 10);
             hp.Heal(20f);
+            if (level) level.RespawnPickups();
 
             yield return new WaitForSeconds(timeBetweenWaves);
         }
@@ -67,12 +71,13 @@ public class SurvivalSpawner : MonoBehaviour
 
     void Spawn(int wave)
     {
-        // vlna 1: len prvý typ, vlna 2-3: dva typy, od vlny 4 všetky
+        // vlna 1: len prvý typ, každé 2 vlny pribudne ďalší typ
         int kinds = Mathf.Clamp(1 + wave / 2, 1, enemyPrefabs.Length);
         Enemy prefab = enemyPrefabs[UnityEngine.Random.Range(0, kinds)];
         Vector3 p = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Count)]
                     + new Vector3(UnityEngine.Random.Range(-1f, 1f), 0f, UnityEngine.Random.Range(-1f, 1f));
         Enemy e = Instantiate(prefab, p, Quaternion.identity);
+        e.health *= 1f + waveHealthGrowth * (wave - 1);   // Start() ho ešte vynásobí obtiažnosťou levelu
         e.Alert();
     }
 }

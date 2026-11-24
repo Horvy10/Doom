@@ -19,17 +19,24 @@ public class LevelBuilder : MonoBehaviour
 
     [Header("Objekty")]
     public Door doorPrefab;
+    public Door secretDoorPrefab;              // tajné dvere: vyzerajú ako stena
     public GameObject exitPrefab;
-    public Enemy zombiePrefab, impPrefab, demonPrefab;
-    public Pickup healthPrefab, armorPrefab, bulletsPrefab, shellsPrefab;
+    public Secret secretPrefab;
+    public Barrel barrelPrefab;
+    public Enemy zombiePrefab, impPrefab, demonPrefab, heavyPrefab;
+    public Pickup healthPrefab, armorPrefab, bulletsPrefab, shellsPrefab, rocketsPrefab;
     public Pickup keyRedPrefab, keyBluePrefab, keyYellowPrefab;
-    public Pickup shotgunPrefab, chaingunPrefab;
+    public Pickup shotgunPrefab, chaingunPrefab, launcherPrefab;
 
     [Header("Scéna")]
     public Transform player;
     public SurvivalSpawner spawner;
 
     public readonly List<Vector3> SpawnPoints = new List<Vector3>();
+
+    // miesta predmetov: v survivale sa po vlne obnovia
+    class PickupSpot { public Pickup prefab; public Vector3 pos; public Pickup instance; }
+    readonly List<PickupSpot> pickupSpots = new List<PickupSpot>();
 
     Transform geometry;   // steny a podlaha: z nich sa pečie NavMesh
     Transform objects;    // nepriatelia, predmety, dvere: mimo NavMeshu
@@ -43,7 +50,11 @@ public class LevelBuilder : MonoBehaviour
         surface.collectObjects = CollectObjects.Children;
         surface.BuildNavMesh();
 
-        if (spawner) spawner.spawnPoints = SpawnPoints;
+        if (spawner)
+        {
+            spawner.spawnPoints = SpawnPoints;
+            spawner.level = this;
+        }
     }
 
     void Build(string[] map)
@@ -77,19 +88,25 @@ public class LevelBuilder : MonoBehaviour
                     case 'z': Spawn(zombiePrefab, pos); break;
                     case 'i': Spawn(impPrefab, pos); break;
                     case 'd': Spawn(demonPrefab, pos); break;
-                    case 'h': Spawn(healthPrefab, item); break;
-                    case 'a': Spawn(armorPrefab, item); break;
-                    case 'b': Spawn(bulletsPrefab, item); break;
-                    case 's': Spawn(shellsPrefab, item); break;
-                    case 'S': Spawn(shotgunPrefab, item); break;
-                    case 'C': Spawn(chaingunPrefab, item); break;
-                    case 'R': Spawn(keyRedPrefab, item); break;
-                    case 'U': Spawn(keyBluePrefab, item); break;
-                    case 'Y': Spawn(keyYellowPrefab, item); break;
+                    case 'H': Spawn(heavyPrefab, pos); break;
+                    case 'o': Spawn(barrelPrefab, pos); break;
+                    case 'h': SpawnPickup(healthPrefab, item); break;
+                    case 'a': SpawnPickup(armorPrefab, item); break;
+                    case 'b': SpawnPickup(bulletsPrefab, item); break;
+                    case 's': SpawnPickup(shellsPrefab, item); break;
+                    case 'k': SpawnPickup(rocketsPrefab, item); break;
+                    case 'S': SpawnPickup(shotgunPrefab, item); break;
+                    case 'C': SpawnPickup(chaingunPrefab, item); break;
+                    case 'L': SpawnPickup(launcherPrefab, item); break;
+                    case 'R': SpawnPickup(keyRedPrefab, item); break;
+                    case 'U': SpawnPickup(keyBluePrefab, item); break;
+                    case 'Y': SpawnPickup(keyYellowPrefab, item); break;
                     case 'D': MakeDoor(map, r, c, pos, KeyColor.None); break;
                     case 'r': MakeDoor(map, r, c, pos, KeyColor.Red); break;
                     case 'u': MakeDoor(map, r, c, pos, KeyColor.Blue); break;
                     case 'y': MakeDoor(map, r, c, pos, KeyColor.Yellow); break;
+                    case '=': MakeSecretDoor(pos); break;
+                    case '!': Spawn(secretPrefab, pos); break;
                     case 'E': Spawn(exitPrefab, pos); break;
                     case 'x': SpawnPoints.Add(pos); break;
                 }
@@ -118,6 +135,22 @@ public class LevelBuilder : MonoBehaviour
         if (o is Enemy e) e.transform.rotation = Quaternion.Euler(0f, Random.Range(0, 4) * 90f, 0f);
     }
 
+    void SpawnPickup(Pickup prefab, Vector3 pos)
+    {
+        if (prefab == null) return;
+        PickupSpot spot = new PickupSpot { prefab = prefab, pos = pos };
+        spot.instance = Instantiate(prefab, pos, Quaternion.identity, objects);
+        pickupSpots.Add(spot);
+    }
+
+    // survival: po vlne vráti na miesto predmety, ktoré hráč zobral
+    public void RespawnPickups()
+    {
+        foreach (PickupSpot spot in pickupSpots)
+            if (spot.instance == null)
+                spot.instance = Instantiate(spot.prefab, spot.pos, Quaternion.identity, objects);
+    }
+
     void MakeDoor(string[] map, int r, int c, Vector3 pos, KeyColor key)
     {
         if (doorPrefab == null) return;
@@ -134,6 +167,16 @@ public class LevelBuilder : MonoBehaviour
             mpb.SetColor("_BaseColor", KeyTint(key));
             foreach (Renderer rend in d.GetComponentsInChildren<Renderer>()) rend.SetPropertyBlock(mpb);
         }
+    }
+
+    // tajné dvere: celá bunka ako stena, otvoria sa klávesom E ako bežné dvere
+    void MakeSecretDoor(Vector3 pos)
+    {
+        Door prefab = secretDoorPrefab ? secretDoorPrefab : doorPrefab;
+        if (prefab == null) return;
+        Door d = Instantiate(prefab, pos + Vector3.up * wallHeight * 0.5f, Quaternion.identity, objects);
+        d.transform.localScale = new Vector3(cell, wallHeight, cell);
+        d.requiredKey = KeyColor.None;
     }
 
     public static Color KeyTint(KeyColor key)
