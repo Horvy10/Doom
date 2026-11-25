@@ -1,72 +1,190 @@
-# Doom (Unity klon)
+<div align="center">
 
-Školský tímový projekt: klon hry Doom (1993) v Unity 6 (`6000.6.2f1`, URP), skóre sa ukladá do Firebase Realtime Database.
-Štruktúra je rovnaká ako v [car-race-master](https://github.com/Horvy10/car-race-master).
+# 💀 DOOM – Unity klon
 
-## Režimy
-- **Kampaň**: 5 levelov. Prejdi level, nájdi kľúče, otvor dvere a vojdi do zeleného východu. Skóre = zabitia + bonus za čas + bonus za tajné miesta.
-- **Survival**: aréna, vlny nepriateľov, ktoré sú čoraz väčšie a silnejšie. Po vlne sa predmety v aréne obnovia. Hra končí smrťou. Skóre = zabitia.
+**Retro first-person strieľačka inšpirovaná pôvodným Doomom (1993)**
 
-## Ovládanie
-WASD pohyb, Shift beh, myš mierenie, ľavé tlačidlo streľba, 1–5 alebo koliesko výber zbrane, E otvorenie dverí (aj tajných), Esc pauza.
+![Unity](https://img.shields.io/badge/Unity-6000.6.2f1-000000?logo=unity&logoColor=white)
+![URP](https://img.shields.io/badge/Render-URP-2b6cb0)
+![C#](https://img.shields.io/badge/C%23-skripty-239120?logo=csharp&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-Realtime%20DB-FFCA28?logo=firebase&logoColor=black)
+![Tím](https://img.shields.io/badge/tím-3%20ľudia-8b0000)
 
-## Rozdelenie práce
-| Kto | Čo | Kde |
+*Školský tímový projekt · nadväzuje na [Car Race Master](https://github.com/Horvy10/car-race-master)*
+
+</div>
+
+---
+
+## 🎮 O čom je hra
+
+Si sám v tmavej základni plnej démonov. Prebíjaš sa chodbami a miestnosťami, zbieraš zbrane, muníciu a kľúče a hľadáš **zelený východ**, ktorý ťa pustí do ďalšieho levelu. Nepriatelia ťa počujú strieľať, naháňajú ťa po mape a útočia zblízka aj zďaleka. Čím ďalej si, tým sú silnejší.
+
+Celá grafika, modely, častice aj zvuky sa **generujú kódom**, v projekte nie sú žiadne cudzie assety. Obraz má nízke rozlíšenie s ostrými pixelmi, aby pripomínal hry z 90. rokov.
+
+```
+###############          #  stena          P  ty (štart)
+#P..h..#......#          z  zombie         E  východ
+#......#..z...#          i  imp            D  dvere
+#..b...D......#          d  démon          h  lekárnička
+#......#...z..#          b  náboje         S  brokovnica
+####D######D###
+#..z..#...d...#          ← takto vyzerá mapa levelu v kóde,
+#..S..D...E...#            hra z nej pri štarte postaví 3D level
+###############
+```
+
+---
+
+## 🕹️ Režimy
+
+| | 🗺️ **Kampaň** | 🌊 **Survival** |
 |---|---|---|
-| Lukáš | jadro hry: hráč, zbrane, nepriatelia, predmety, dvere, levely, survival | `Assets/Scripts/`, `Editor/LukasSetup.cs` |
-| Marco | UI (menu, výber levelu, HUD, pauza, rebríček) + Firebase | `Assets/Scripts/UI/`, `Editor/MarcoSetup.cs` |
-| Samo | grafika a prostredie: steny, podlahy, modely, efekty, svetlá, zvuky | `Assets/Scripts/Prostredie/`, `Editor/SamoSetup.cs` |
+| **Cieľ** | dostať sa do zeleného východu | prežiť čo najviac vĺn |
+| **Mapa** | 5 levelov s kľúčmi, dverami a tajnými miestami | jedna aréna so stĺpmi |
+| **Koniec** | vojdeš do východu, odomkne sa ďalší level | zomrieš |
+| **Skóre** | zabitia + bonus za čas + 500 za každé tajné miesto | zabitia |
+| **Obtiažnosť** | každý level má silnejších a rýchlejších nepriateľov a menej munície | každá vlna je väčšia, každé 2 vlny pribudne silnejší typ, životy +8 % za vlnu |
 
-## Prvé spustenie
-1. Otvor projekt v Unity Hub (Add project from disk).
-2. Menu **Tools > Lukas > 1. Vytvor prefaby a scénu Game**. Vytvorí prefaby v `Assets/Prefabs/Lukas`, materiály v `Assets/Art/Lukas` a scénu `Assets/Scenes/Game.unity` (pridá ju do Build Settings).
-3. Menu **Tools > Samo > Grafika, efekty a zvuky**. Vygeneruje textúry, materiály a zvuky (`Assets/Art/Samo`, `Assets/Audio/Samo`), steny/podlahu/strop (`Assets/Prefabs/Samo`), dá modely do Lukášových prefabov a nastaví scénu (svetlá, hmla, post-processing, modely zbraní, objekt `Efekty`). Po každom spustení kroku 2 treba krok 3 zopakovať.
-4. Otvor scénu `Game` a stlač Play.
+Po každej hre sa skóre uloží do **Firebase** (meno, body, zabitia, čas, level alebo vlna, dátum). Rebríček Top 10 je v hlavnom menu.
 
-Na test survivalu bez menu: objekt `GameManager`, zaškrtni `Override Session` a nastav `Test Mode = Survival`.
+```mermaid
+flowchart LR
+    A[Hlavné menu] -->|Kampaň + level| B[Level]
+    A -->|Survival| C[Aréna]
+    A --> R[Rebríček Top 10]
+    B -->|vojdeš do východu| W[Výhra]
+    B -->|zomrieš| L[Prehra]
+    C -->|vlna za vlnou ...| C
+    C -->|zomrieš| L
+    W -->|skóre| F[(Firebase)]
+    L -->|skóre zo survivalu| F
+    W -->|ďalší level| B
+    F --> R
+```
 
-## Ako to funguje
+---
+
+## ⌨️ Ovládanie
+
+| Kláves | Akcia |
+|:---:|---|
+| `W` `A` `S` `D` | pohyb |
+| `Shift` | beh |
+| 🖱️ myš | mierenie |
+| 🖱️ ľavé tlačidlo | streľba (podržať = automaticky) |
+| `1` – `5` / koliesko | výber zbrane |
+| `E` | otvoriť dvere (aj tajné, ktoré vyzerajú ako stena) |
+| `Tab` | inventár |
+| `Esc` | pauza |
+
+---
+
+## 🔫 Zbrane
+
+| # | Zbraň | Munícia | Ako funguje |
+|:---:|---|---|---|
+| 1 | 👊 **Päsť** | – | silný úder zblízka, vždy po ruke |
+| 2 | 🔫 **Pištoľ** | náboje | presná, pomalšia streľba |
+| 3 | 💥 **Brokovnica** | broky | 7 brokov naraz, ničivá zblízka |
+| 4 | ⚙️ **Guľomet** | náboje | rýchla paľba, míňa veľa nábojov |
+| 5 | 🚀 **Raketomet** | rakety | raketa vybuchne a zraní všetko v okolí, aj teba |
+
+Keď zbrani dôjde munícia, hra sama prepne na najlepšiu zbraň, do ktorej ešte máš muníciu.
+
+---
+
+## 👹 Nepriatelia
+
+| Nepriateľ | Útok | Životy | Poznámka |
+|---|---|:---:|---|
+| 🧟 **Zombie** | strieľa | ❤️ | slabý, často sa zastaví po zásahu, pustí náboje |
+| 🔥 **Imp** | hádže ohnivé gule | ❤️❤️ | guliam sa dá uhnúť |
+| 🐗 **Démon** | hryzie zblízka | ❤️❤️❤️ | rýchly, ide rovno na teba |
+| 🛡️ **Ťažký strelec** | dávky po 4 výstreloch | ❤️❤️❤️❤️ | veľmi odolný, pustí náboje |
+
+Nepriatelia stoja, kým ťa neuvidia alebo nepočujú výstrel. Potom ťa naháňajú po mape. Keď jedného nepriateľa omylom zraní iný (ohnivá guľa, výbuch), chvíľu bojujú medzi sebou.
+
+---
+
+## 📦 Predmety
+
+| Predmet | Čo dá |
+|---|---|
+| ➕ Lekárnička | zdravie |
+| 🦺 Brnenie | zachytí časť poškodenia |
+| 🟡 Náboje · 🔴 Broky · 🚀 Rakety | munícia |
+| 🗝️ Červený · Modrý · Žltý kľúč | otvorí dvere tej istej farby |
+| 🛢️ Výbušný sud | po zásahu vybuchne a zraní všetko v okolí |
+| ❓ Tajné miesto | skryté za tajnými dverami, +500 bodov |
+
+---
+
+## 👥 Tím
+
+| | Kto | Na čom robil | Kde v projekte |
+|:---:|---|---|---|
+| 🧠 | **Lukáš** | jadro hry: hráč, zbrane, nepriatelia, AI, predmety, dvere, levely, survival, skóre | `Assets/Scripts/`, `Editor/LukasSetup.cs` |
+| 🎨 | **Samo** | grafika, textúry, modely, animácie, svetlá, efekty, zvuky, retro vzhľad, zatiaľ aj menu a HUD | `Assets/Scripts/Prostredie/`, `Assets/Scripts/UI/`, `Editor/SamoSetup.cs` |
+| 🖥️ | **Marco** | UI a Firebase (rebríček, ukladanie skóre) | `Assets/Scripts/UI/` |
+
+---
+
+## 🚀 Spustenie
+
+1. Naklonuj repo a otvor ho v **Unity Hub** cez *Add project from disk*. Potrebná verzia je `6000.6.2f1`.
+2. Otvor scénu **`Assets/Scenes/Menu.unity`** a stlač ▶️ **Play**.
+
+Prefaby a scény sú už v repe. Ak ich treba vygenerovať nanovo:
+
+1. **Tools › Lukas › 1. Vytvor prefaby a scénu Game**
+2. **Tools › Samo › Grafika, efekty a zvuky** (spusti vždy po kroku 1)
+
+Survival bez menu otestuješ tak, že v scéne `Game` na objekte `GameManager` zaškrtneš `Override Session` a nastavíš `Test Mode = Survival`.
+
+---
+
+<details>
+<summary><b>🛠️ Pre vývojárov: ako to funguje vnútri</b></summary>
+
+### Jadro (Lukáš)
 - `GameSession`: tabuľka levelov (obtiažnosť), vybraný level a režim. Menu ich nastaví pred načítaním scény `Game`.
-- `LevelMaps`: mapy levelov ako text (legenda je v súbore). Nový level = nová textová mapa. Znaky: `#` stena, `P` štart, `E` východ, `z/i/d/H` nepriatelia, `o` sud, `D` dvere, `r/u/y` dvere na kľúč, `R/U/Y` kľúče, `=` tajné dvere, `!` tajné miesto, `h/a/b/s/k` predmety, `S/C/L` zbrane, `x` spawn survivalu.
+- `LevelMaps`: mapy levelov ako text, legenda je v súbore. Nový level = nová textová mapa. Znaky: `#` stena, `P` štart, `E` východ, `z/i/d/H` nepriatelia, `o` sud, `D` dvere, `r/u/y` dvere na kľúč, `R/U/Y` kľúče, `=` tajné dvere, `!` tajné miesto, `h/a/b/s/k` predmety, `S/C/L` zbrane, `x` spawn survivalu.
 - `LevelBuilder`: pri štarte postaví level z mapy a upečie NavMesh. Prefaby stien a podlahy sú kocky 1×1×1, builder ich naškáluje na bunku 4 m.
-- `GameManager`: zabitia, skóre, čas, výhra a smrť. Po hre zavolá `FirebaseService.SaveScore`.
-- `SurvivalSpawner`: vlny nepriateľov na bodoch `x` v aréne. Každé 2 vlny pribudne silnejší typ, nepriatelia majú v každej vlne o 8 % viac životov.
-- Zbrane (`WeaponSystem.weapons`): 0 päsť, 1 pištoľ, 2 brokovnica, 3 guľomet, 4 raketomet (strieľa `Projectile` s výbuchom).
-- Nepriatelia (`Enemy`): zombie (strieľa), imp (ohnivé gule), démon (zblízka), ťažký strelec (dávky po 4 výstreloch, veľa životov). Po zásahu sa môžu na chvíľu zastaviť (`painChance`), zombie a ťažký strelec pustia náboje (`dropPrefab`). Keď nepriateľa zraní iný nepriateľ (ohnivá guľa, výbuch), na chvíľu bojuje s ním. Projektily preletia cez nepriateľov rovnakého druhu.
-- `Barrel`: výbušný sud, po zásahoch vybuchne (`Explosion.Blast`) a zraní všetko v okruhu, aj hráča a iné sudy.
-- `Secret`: tajné miesto za tajnými dverami. Pri vstupe `GameManager.FoundSecret()` (+500 bodov).
-- `IDamageable.TakeDamage(amount, point, normal, attacker)`: `attacker` je ten, kto zranil (hráč, nepriateľ alebo null).
-- `DebugHUD`: **dočasné** HUD na testovanie. Marco ho nahradí vlastným UI.
+- `GameManager`: zabitia, skóre, čas, tajné miesta, výhra a smrť. Po hre zavolá `FirebaseService.SaveScore`.
+- `SurvivalSpawner`: vlny nepriateľov na bodoch `x` v aréne.
+- `WeaponSystem.weapons`: 0 päsť, 1 pištoľ, 2 brokovnica, 3 guľomet, 4 raketomet (strieľa `Projectile` s výbuchom).
+- `Enemy`: stavy, NavMesh, `painChance`, `dropPrefab`, boj medzi nepriateľmi. Projektily preletia cez nepriateľov rovnakého druhu.
+- `Barrel` + `Explosion.Blast`: výbuch zraní všetko v okruhu, aj hráča a iné sudy.
+- `Secret`: tajné miesto, pri vstupe `GameManager.FoundSecret()`.
+- `IDamageable.TakeDamage(amount, point, normal, attacker)`: `attacker` je ten, kto zranil (hráč, nepriateľ alebo `null`).
+- `DebugHUD`: staré testovacie HUD. V scéne ho už nahradil `Hud`.
 
-### Napojenie pre UI (Marco)
+### Napojenie pre UI
 - Spustenie hry: `GameSession.Mode = GameMode.Campaign` (alebo `Survival`), `GameSession.CurrentLevel = n`, potom `SceneManager.LoadScene("Game")`.
 - Stav: `GameManager.Instance` (`Kills`, `TotalEnemies`, `Score`, `PlayTime`, `Wave`, `SecretsFound`, `TotalSecrets`, `CurrentState`, eventy `Won` a `Lost`), `Restart()`, `NextLevel()`.
 - Hráč: `PlayerHealth.Instance` (`health`, `armor`, event `Damaged`), `PlayerInventory` (munícia `Bullets`/`Shells`/`Rockets`, kľúče, event `Changed`), `WeaponSystem` (`CurrentWeapon`, eventy `Fired` a `Switched`).
-- Správy: `Door.NeedKey`, `Pickup.Collected`, `Secret.Found` („Našiel si tajné miesto!“), `SurvivalSpawner.WaveStarted`.
+- Správy: `Door.NeedKey`, `Pickup.Collected`, `Secret.Found`, `SurvivalSpawner.WaveStarted`.
 - Pauza: `Time.timeScale = 0`, `PlayerController.LockCursor(false)`.
 - Firebase: `FirebaseService.LoadTop10(FirebaseService.Campaign | Survival, callback)`. Dáta sú v `doom/scores/<režim>`.
 
-### Napojenie pre grafiku (Samo)
-- Vymeň `wallPrefab`, `floorPrefab` a voliteľný `ceilingPrefab` na objekte `Level`. Tajné dvere (`SecretDoor`) majú vyzerať ako stena.
-- Modely zbraní: `WeaponSystem.viewModels` (index = poradie zbrane, 0–4).
-- Efekty: `WeaponSystem.Hit` (bod, normála, zasiahnutý nepriateľ), `Projectile.Impact`, `Explosion.Exploded` (bod, polomer), `Barrel.Exploding`, `Enemy.Attacked`, `Enemy.Hurt`, `Enemy.Killed`, `Door.Opened`, `Secret.Found`.
-- Nepriatelia: prefaby `Enemy_*`. Model daj ako dieťa a kapsulu `Body` skry alebo vymeň (animácia útoku škáluje objekt `Body`).
-- Sud (`Barrel`) a predmety (`Pickup_*`): model je dieťa `Model`, ten môžeš vymeniť. Collidery na koreni nemeň. Raketa (`Rocket`) a ohnivá guľa (`Fireball`) sú guľa so svetlom, model daj ako dieťa a MeshRenderer gule vypni.
-
-### Grafika (Samo) – ako to funguje
-- Všetko generuje `Editor/SamoSetup.cs` kódom: pixelové textúry, modely z primitív, častice, syntetizované zvuky. V repe nie sú cudzie assety.
-- `Varianta`: stena/podlaha si podľa polohy vyberie materiál (betón, panely, rúry / plech, mriežka). `Lampa`: na strope svieti každá 4. bunka, niektoré lampy sú studené alebo blikajú. Strop má `NavMeshModifier` (ignoruje sa pri pečení NavMeshu).
-- `Efekty` (objekt v scéne): počúva eventy hry a spúšťa častice, záblesky a zvuky. `EnemyFx` na prefaboch `Enemy_*` posiela inštančné eventy nepriateľa do `Efekty`.
-- Retro vzhľad: URP render scale 0.5 s ostrým (Point) zväčšením v `Assets/Settings/*_RPAsset`. Týka sa len 3D obrazu, UI ostáva ostré.
-- `EnemyAnim`: procedurálna animácia nepriateľov (chôdza, dýchanie, útok, záblesk po zásahu, póza po smrti). Kosti sú prázdne objekty v `Body/Model/Rig` (`LegL`, `ArmR`, `Head`, `Jaw`…).
-
-### UI (zatiaľ robil Samo, Marco môže nahradiť)
-- Scéna `Menu` (prvá v Build Settings): `HlavneMenu` – kampaň s výberom levelu, survival, rebríček (`FirebaseService.LoadTop10`), nastavenia (hlasitosť, citlivosť myši, meno hráča). Pozadie je aréna, okolo ktorej krúži kamera.
-- `Hud` v scéne `Game` (nahrádza `DebugHUD`): stavový panel dole, správy pri zbieraní („Získal si brokovnicu!“), Tab = inventár, Esc = pauza, obrazovka smrti a výhry.
+### UI (Samo)
+- Scéna `Menu` (prvá v Build Settings): `HlavneMenu` – kampaň s výberom levelu, survival, rebríček, nastavenia (hlasitosť, citlivosť myši, meno hráča). Pozadie je aréna, okolo ktorej krúži kamera.
+- `Hud` v scéne `Game`: stavový panel dole, správy pri zbieraní, `Tab` = inventár, `Esc` = pauza, obrazovka smrti a výhry.
 - `PixelUi`: vlastný pixelový font s diakritikou, panely, `PixelMenu` (myš aj šípky + Enter), `Nastavenia` (PlayerPrefs).
 
-## Firebase
-`Assets/google-services.json` a `Assets/StreamingAssets/google-services-desktop.json` sú prevzaté z Car Race Master (rovnaký Firebase projekt). Repo musí ostať **súkromné**. Skontrolujte pravidlá databázy (Realtime Database > Rules).
+### Grafika (Samo)
+- Všetko generuje `Editor/SamoSetup.cs` kódom: pixelové textúry, modely z primitív, častice, syntetizované zvuky.
+- `Varianta`: stena alebo podlaha si podľa polohy vyberie materiál (betón, panely, rúry, plech, mriežka). `Lampa`: na strope svieti každá 4. bunka, niektoré lampy sú studené alebo blikajú. Strop má `NavMeshModifier`, pri pečení NavMeshu sa ignoruje.
+- `Efekty` (objekt v scéne) počúva eventy hry a spúšťa častice, záblesky a zvuky. `EnemyFx` na prefaboch `Enemy_*` posiela eventy nepriateľa do `Efekty`.
+- `EnemyAnim`: procedurálna animácia (chôdza, dýchanie, útok, záblesk po zásahu, póza po smrti). Kosti sú prázdne objekty v `Body/Model/Rig`.
+- Retro vzhľad: URP render scale 0.5 s ostrým (Point) zväčšením v `Assets/Settings/*_RPAsset`. Týka sa len 3D obrazu, UI ostáva ostré.
+- Eventy pre efekty: `WeaponSystem.Hit`, `Projectile.Impact`, `Explosion.Exploded`, `Barrel.Exploding`, `Enemy.Attacked`, `Enemy.Hurt`, `Enemy.Killed`, `Door.Opened`, `Secret.Found`.
 
-## Poznámka
+### Firebase
+`Assets/google-services.json` a `Assets/StreamingAssets/google-services-desktop.json` sú prevzaté z Car Race Master (rovnaký Firebase projekt). Repo musí ostať **súkromné**. Skontrolujte pravidlá databázy (Realtime Database › Rules).
+
+### Poznámka
 V projekte je vypnutý reload domény (Enter Play Mode Options). Každé statické pole a event preto treba vynulovať cez `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]`.
+
+</details>
