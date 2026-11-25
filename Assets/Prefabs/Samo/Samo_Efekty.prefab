@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7082870118912451734
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 122354181962697670}
+  - component: {fileID: 5305012364683630802}
+  m_Layer: 0
+  m_Name: Samo_Efekty
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &122354181962697670
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7082870118912451734}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5305012364683630802
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7082870118912451734}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85e4ceeee0da3624992e560fb97c445a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Efekty
+  sparks: {fileID: 4323673679777014349, guid: 5882aef4ad27d4846b2149c68a060783, type: 3}
+  blood: {fileID: 6290305454275762, guid: 00f005db8f9ebb642a367fe6ffcf7db6, type: 3}
+  bloodBig: {fileID: 391660969719924834, guid: ebbc76543532c08429288ed739405f01, type: 3}
+  explosion: {fileID: 6177400086236771035, guid: b0eb4d7b42a37574495bca2ec10c3185, type: 3}
+  fireImpact: {fileID: 3752524768285641944, guid: 84bf076571e153f448a57b31bc42d748, type: 3}
+  muzzle: {fileID: 2534066812354239406, guid: d48f02c762f83424aaec52e8ac4a5dff, type: 3}
+  weaponClips:
+  - {fileID: 8300000, guid: 9a4390530454fdf49898192ece2392a1, type: 3}
+  - {fileID: 8300000, guid: 8f1ec5d7f78b72d4d83e4015f488dd8b, type: 3}
+  - {fileID: 8300000, guid: d5a396099a08659408f2c44acd39eb7f, type: 3}
+  - {fileID: 8300000, guid: 76a1a818ad1424242843866a9e944983, type: 3}
+  - {fileID: 8300000, guid: 47ca88b4622d08b41ad2a27f3a12ba4e, type: 3}
+  explosionClip: {fileID: 8300000, guid: 9b50e55a12540934891c4cc765c3a6f4, type: 3}
+  impactClip: {fileID: 8300000, guid: ddd826cd404a8c740a7133597b1d2d34, type: 3}
+  enemyShot: {fileID: 8300000, guid: b3da504cd34aac041ae2760a3b62b499, type: 3}
+  fireballClip: {fileID: 8300000, guid: a85975138d7b46441bc500b5521298d5, type: 3}
+  biteClip: {fileID: 8300000, guid: e9aa5608230a0024ebb26effea280cf7, type: 3}
+  enemyHurt: {fileID: 8300000, guid: be6d231ffc2298645abf9d9880fa8be7, type: 3}
+  enemyDeath: {fileID: 8300000, guid: dab750c6685281246982d1bb9d055f5e, type: 3}
+  doorClip: {fileID: 8300000, guid: 687555f0a53fb1b489cf81ac3c46e39b, type: 3}
+  deniedClip: {fileID: 8300000, guid: 5917b69021066ff45996b35dae238671, type: 3}
+  pickupClip: {fileID: 8300000, guid: bd313180f8efc42458c260545c37b90a, type: 3}
+  weaponPickupClip: {fileID: 8300000, guid: 019a3b748696a5f42929011133e498d8, type: 3}
+  secretClip: {fileID: 8300000, guid: 4ce400298b493b5469e8e3828d8c6995, type: 3}
+  playerHurt: {fileID: 8300000, guid: 6dfb27eaf1e8b394dbce46236365064b, type: 3}
+  playerDeath: {fileID: 8300000, guid: b3337ac8145fc124c9e248d3d62643eb, type: 3}
+  ambience: {fileID: 8300000, guid: 4aa2398d6e95da941a5f265235fb5b7a, type: 3}

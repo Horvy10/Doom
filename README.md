@@ -20,7 +20,8 @@ WASD pohyb, Shift beh, myš mierenie, ľavé tlačidlo streľba, 1–5 alebo kol
 ## Prvé spustenie
 1. Otvor projekt v Unity Hub (Add project from disk).
 2. Menu **Tools > Lukas > 1. Vytvor prefaby a scénu Game**. Vytvorí prefaby v `Assets/Prefabs/Lukas`, materiály v `Assets/Art/Lukas` a scénu `Assets/Scenes/Game.unity` (pridá ju do Build Settings).
-3. Otvor scénu `Game` a stlač Play.
+3. Menu **Tools > Samo > Grafika, efekty a zvuky**. Vygeneruje textúry, materiály a zvuky (`Assets/Art/Samo`, `Assets/Audio/Samo`), steny/podlahu/strop (`Assets/Prefabs/Samo`), dá modely do Lukášových prefabov a nastaví scénu (svetlá, hmla, post-processing, modely zbraní, objekt `Efekty`). Po každom spustení kroku 2 treba krok 3 zopakovať.
+4. Otvor scénu `Game` a stlač Play.
 
 Na test survivalu bez menu: objekt `GameManager`, zaškrtni `Override Session` a nastav `Test Mode = Survival`.
 
@@ -51,6 +52,18 @@ Na test survivalu bez menu: objekt `GameManager`, zaškrtni `Override Session` a
 - Efekty: `WeaponSystem.Hit` (bod, normála, zasiahnutý nepriateľ), `Projectile.Impact`, `Explosion.Exploded` (bod, polomer), `Barrel.Exploding`, `Enemy.Attacked`, `Enemy.Hurt`, `Enemy.Killed`, `Door.Opened`, `Secret.Found`.
 - Nepriatelia: prefaby `Enemy_*`. Model daj ako dieťa a kapsulu `Body` skry alebo vymeň (animácia útoku škáluje objekt `Body`).
 - Sud (`Barrel`) a predmety (`Pickup_*`): model je dieťa `Model`, ten môžeš vymeniť. Collidery na koreni nemeň. Raketa (`Rocket`) a ohnivá guľa (`Fireball`) sú guľa so svetlom, model daj ako dieťa a MeshRenderer gule vypni.
+
+### Grafika (Samo) – ako to funguje
+- Všetko generuje `Editor/SamoSetup.cs` kódom: pixelové textúry, modely z primitív, častice, syntetizované zvuky. V repe nie sú cudzie assety.
+- `Varianta`: stena/podlaha si podľa polohy vyberie materiál (betón, panely, rúry / plech, mriežka). `Lampa`: na strope svieti každá 4. bunka, niektoré lampy sú studené alebo blikajú. Strop má `NavMeshModifier` (ignoruje sa pri pečení NavMeshu).
+- `Efekty` (objekt v scéne): počúva eventy hry a spúšťa častice, záblesky a zvuky. `EnemyFx` na prefaboch `Enemy_*` posiela inštančné eventy nepriateľa do `Efekty`.
+- Retro vzhľad: URP render scale 0.5 s ostrým (Point) zväčšením v `Assets/Settings/*_RPAsset`. Týka sa len 3D obrazu, UI ostáva ostré.
+- `EnemyAnim`: procedurálna animácia nepriateľov (chôdza, dýchanie, útok, záblesk po zásahu, póza po smrti). Kosti sú prázdne objekty v `Body/Model/Rig` (`LegL`, `ArmR`, `Head`, `Jaw`…).
+
+### UI (zatiaľ robil Samo, Marco môže nahradiť)
+- Scéna `Menu` (prvá v Build Settings): `HlavneMenu` – kampaň s výberom levelu, survival, rebríček (`FirebaseService.LoadTop10`), nastavenia (hlasitosť, citlivosť myši, meno hráča). Pozadie je aréna, okolo ktorej krúži kamera.
+- `Hud` v scéne `Game` (nahrádza `DebugHUD`): stavový panel dole, správy pri zbieraní („Získal si brokovnicu!“), Tab = inventár, Esc = pauza, obrazovka smrti a výhry.
+- `PixelUi`: vlastný pixelový font s diakritikou, panely, `PixelMenu` (myš aj šípky + Enter), `Nastavenia` (PlayerPrefs).
 
 ## Firebase
 `Assets/google-services.json` a `Assets/StreamingAssets/google-services-desktop.json` sú prevzaté z Car Race Master (rovnaký Firebase projekt). Repo musí ostať **súkromné**. Skontrolujte pravidlá databázy (Realtime Database > Rules).
